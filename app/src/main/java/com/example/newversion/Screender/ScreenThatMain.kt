@@ -30,9 +30,7 @@ import com.example.newversion.Navigacia.ScreensOfNav
 @Composable
 fun ScreenThatMain(navController: NavController, viewModel: WebVewModel = viewModel()) {
     val context = LocalContext.current as Activity
-    var currentUrl by remember {
-        mutableStateOf("")
-    }
+    var currentUrl by remember { mutableStateOf("") }
     val mUploadMessage = remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -47,8 +45,7 @@ fun ScreenThatMain(navController: NavController, viewModel: WebVewModel = viewMo
     val webView = remember {
         WebView(context).apply {
             layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
             )
             val cookieManager = CookieManager.getInstance()
             cookieManager.setAcceptCookie(true)
@@ -61,14 +58,18 @@ fun ScreenThatMain(navController: NavController, viewModel: WebVewModel = viewMo
                 displayZoomControls = false
             }
             webViewClient = object : WebViewClient() {
-                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                override fun shouldOverrideUrlLoading(view: WebView?,
+                                                      request: WebResourceRequest?): Boolean {
                     currentUrl = request?.url.toString()
                     return false
                 }
-                override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
+                override fun onReceivedError(view: WebView,
+                                             request: WebResourceRequest,
+                                             error: WebResourceError) {
 
                 }
-                override fun onPageFinished(view: WebView?, url: String?) {
+                override fun onPageFinished(view: WebView?,
+                                            url: String?) {
                     evaluateJavascript("(function() { return document.body.innerHTML; })()") { result ->
                         val resultWithoutQuotes =
                             result?.substring(1, result.length - 1)
@@ -85,13 +86,10 @@ fun ScreenThatMain(navController: NavController, viewModel: WebVewModel = viewMo
             webChromeClient = object : WebChromeClient() {
 
                 override fun onShowFileChooser(
-                    webView: WebView?,
-                    filePathCallback: ValueCallback<Array<Uri>>?,
-                    fileChooserParams: FileChooserParams?
+                    webView: WebView?, filePathCallback: ValueCallback<Array<Uri>>?, fileChooserParams: FileChooserParams?
                 ): Boolean {
                     mUploadMessage.value?.onReceiveValue(null)
                     mUploadMessage.value = filePathCallback
-
                     val intent = Intent(Intent.ACTION_GET_CONTENT)
                     intent.addCategory(Intent.CATEGORY_OPENABLE)
                     intent.type = "*/*" // Можно изменить на конкретный тип файлов, который вы хотите загрузить
@@ -103,7 +101,6 @@ fun ScreenThatMain(navController: NavController, viewModel: WebVewModel = viewMo
                         Toast.makeText(context, "Cannot open file chooser", Toast.LENGTH_LONG).show()
                         return false
                     }
-
                     return true
                 }
             }
@@ -112,25 +109,20 @@ fun ScreenThatMain(navController: NavController, viewModel: WebVewModel = viewMo
                 if (keyCode == KeyEvent.KEYCODE_BACK
                     && event.action == MotionEvent.ACTION_UP
                     && canGoBack()
-                ) {
-                    goBack()
+                ) { goBack()
                     true
                 } else false
             }
         }
     }
     LaunchedEffect("") {
-        if (viewModel.webViewState != null) {
-            webView.restoreState(viewModel.webViewState!!)
+        if (viewModel.webViewState != null) { webView.restoreState(viewModel.webViewState!!)
         } else {
             webView.loadUrl("https://fortune-oxi.cfd/KDMbX844")
         }
     }
-    Surface(modifier = Modifier.fillMaxSize()) {
-        AndroidView({ webView })
-    }
-    DisposableEffect(Unit) {
-        onDispose {
+    Surface(modifier = Modifier.fillMaxSize()) { AndroidView({ webView }) }
+    DisposableEffect(Unit) { onDispose {
             viewModel.webViewState = Bundle().apply {
                 webView.saveState(this)
             }
